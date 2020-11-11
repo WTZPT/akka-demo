@@ -32,7 +32,7 @@ class RequestActor5Test {
     @Test
     public void test4() {
         TestActorRef<RequestActor5> actorRef = TestActorRef.create(system, RequestActor5.props("request"));
-        actorRef.tell("done", ActorRef.noSender());
+        actorRef.tell("message", ActorRef.noSender());
         system.stop(actorRef);
     }
 }

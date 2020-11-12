@@ -5,33 +5,38 @@ import akka.actor.Props;
 import akka.event.Logging;
 import akka.event.LoggingAdapter;
 
-public class RequestActor6 extends AbstractActor {
-
+public class RequestActorUnbecome extends AbstractActor{
     protected final String name;
     protected final LoggingAdapter log = Logging.getLogger(context().system(),this);
-    private Receive hiHandler ;
-    private Receive helloHandler;
+    private AbstractActor.Receive hiHandler ;
+    private AbstractActor.Receive helloHandler;
 
-    public RequestActor6(String name) {
+    public RequestActorUnbecome(String name) {
         this.name = name;
         hiHandler = receiveBuilder()
-                .matchEquals("Hi",message -> {log.info(message); getContext().become(helloHandler); })
+                .matchEquals("Hi",message ->{
+                    log.info(message);
+                    getContext().unbecome();
+                })
                 .matchAny(message -> {log.error(message.toString());})
                 .build();
         helloHandler = receiveBuilder()
-                .matchEquals("Hello",message -> {log.info(message); getContext().become(hiHandler);})
+                .matchEquals("Hello",message -> {
+                    log.info(message);
+                    getContext().become(hiHandler,false);
+                })
                 .matchAny(message -> {log.error(message.toString());})
                 .build();
     }
 
-    public static Props props(String name) {
-        return Props.create(RequestActor6.class,name);
+    static Props props(String name) {
+        return Props.create(RequestActorUnbecome.class,name);
     }
 
     @Override
     public Receive createReceive() {
         return receiveBuilder()
-                .match(String.class,message -> {
+                .matchEquals("init",message -> {
                     log.info(message);
                     getContext().become(helloHandler);
                 })
